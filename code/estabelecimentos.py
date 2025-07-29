@@ -14,7 +14,7 @@ from dask import dataframe as dd
 
 def _processarEstabelecimentos(lista: pd.DataFrame, 
                                output_directory_of_extracted_files: str,
-                               chunksize = 200_000,
+                               chunksize = 32_000_000,
                                cnae = "6492") -> pd.DataFrame:
     """
     
@@ -97,9 +97,7 @@ def _processarEstabelecimentos(lista: pd.DataFrame,
             
             estabelecimento = estabelecimento.loc[mask]
             
-            if not len(estabelecimento.index) == 0:
-            
-                yield estabelecimento
+            yield estabelecimento
 
 
 def processarEstabelecimentos(arquivos: list[str], 
@@ -134,7 +132,9 @@ def processarEstabelecimentos(arquivos: list[str],
         
         estabelecimentos.append(estabelecimento)
         
-    securitizadoras = pd.concat(estabelecimentos, axis=0)
+    securitizadoras = dd.concat(estabelecimentos, 
+                                ignore_order = True,
+                                ignore_unknown_divisions=True)
     
     print('Arquivos de estabelecimentos finalizados!')
     end = time()

@@ -5,7 +5,7 @@ Created on Tue Jul 29 14:27:38 2025
 @author: lealp
 """
 
-import pandas as pd
+from dask import dataframe as dd
 import os
 from time import time
 from data_download import DataHolder
@@ -14,7 +14,8 @@ from filtros_de_securitizacao import filtrar_dados_de_securitizacao
 
 def processarEmpresas(dataHolder: DataHolder, 
                       databaseContext: DatabaseContext,
-                      output_directory_of_extracted_files: str):
+                      output_directory_of_extracted_files: str,
+                      chunksize = 32_000_000):
     
     empresa_insert_start = time()
     print("""
@@ -27,7 +28,7 @@ def processarEmpresas(dataHolder: DataHolder,
     for e in dataHolder.arquivos_empresa:
         print('Trabalhando no arquivo: '+ e +' [...]')
         
-        empresa_dtypes = {'cnpj_basico': str, 
+        dtypes = {'cnpj_basico': str, 
                           'razao_social': str, 
                           'natureza_juridica': int, 
                           'qualificacao_responsavel': int, 
@@ -38,12 +39,13 @@ def processarEmpresas(dataHolder: DataHolder,
         extracted_file_path = os.path.join(output_directory_of_extracted_files, 
                                            e)
 
-        empresa = pd.read_csv(filepath_or_buffer=extracted_file_path,
+        empresa = dd.read_csv(urlpath=extracted_file_path,
                               sep=';',
-                              names=empresa_dtypes.keys(),
+                              names=dtypes.keys(),
                               header=None,
-                              dtype=empresa_dtypes,
+                              dtype=dtypes,
                               encoding='latin-1',
+                              blocksize = chunksize,
                               index_col=False
         )
 

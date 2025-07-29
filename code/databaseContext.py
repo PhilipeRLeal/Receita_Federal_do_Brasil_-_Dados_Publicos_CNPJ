@@ -8,12 +8,20 @@ from sqlalchemy import create_engine
 import psycopg2
 import sys
 import pandas as pd
+from dask import dataframe as dd
+from typing import Union
 
 class DatabaseContext:
     def __init__(self, user:str, passw: str, host:str, port: str, database:str):
-            
-        self.engine = create_engine('postgresql://'+user+':'+passw+'@'+host+':'+port+'/'+database)
-        self.conn = psycopg2.connect('dbname='+database+' '+'user='+user+' '+'host='+host+' '+'port='+port+' '+'password='+passw)
+        
+        
+        self.databaseConnectionString = ('postgresql://'+user+':'+passw+'@'+host+':'+port+'/'+database)
+        
+        self.engine = create_engine(self.databaseConnectionString)
+        
+        dsn = 'dbname='+database+' '+'user='+user+' '+'host='+host+' '+'port='+port+' '+'password='+passw
+        
+        self.conn = psycopg2.connect(dsn)
         self.cur = self.conn.cursor()
         
         
@@ -51,7 +59,7 @@ class DatabaseContext:
 
         
     def to_sql(self, 
-               dataframe: pd.DataFrame, 
+               df: Union[dd.DataFrame, pd.DataFrame], 
                chunksize = (2**15), 
                **kwargs):
         """
@@ -59,7 +67,7 @@ class DatabaseContext:
 
         Parameters
         ----------
-        dataframe : pd.DataFrame
+        df : dd.DataFrame | pd.DataFrame
             Arquivo que será escrito no BD.
             
         chunksize : TYPE, optional
@@ -77,23 +85,36 @@ class DatabaseContext:
 
         """
         
-        if (not dataframe.empty):
-            
-            total = len(dataframe)//chunksize
-            total += 1
+        if (isinstance(df, dd.DataFrame)):
             name = kwargs.get('name')
-        
-            def chunker(df):
-                return (df[i:i + chunksize] for i in range(0, len(df), chunksize))
-        
-            for i, df in enumerate(chunker(dataframe)):
-                df.to_sql(con=self.engine, **kwargs)
-                index = (i+1)
-                progress = f'Escrevendo dados de: {name}. Processo: {index} de {total}.'
-                sys.stdout.write(f'\r{progress}')
+            progress = f'Escrevendo dados de: {name}.'
+            df.to_sql(name=name,
+                      uri = self.databaseConnectionString,
+                      chunksize=chunksize, 
+                      method="multi", 
+                      if_exists = 'append',
+                      parallel=True)
+            
+            sys.stdout.write(f'\r{progress}')
             sys.stdout.write('\n')
+            
         else:
-            print("Arquivo vazio. Nenhum dado para ser gravado no BD")
+            if (not df.empty):
+                total = len(df)//chunksize
+                total += 1
+                name = kwargs.get('name')
+            
+                def chunker(dfx):
+                    return (dfx[i:i + chunksize] for i in range(0, len(dfx), chunksize))
+            
+                for i, df in enumerate(chunker(df)):
+                    df.to_sql(con=self.engine, if_exists = 'append', **kwargs)
+                    index = (i+1)
+                    progress = f'Escrevendo dados de: {name}. Processo: {index} de {total}.'
+                    sys.stdout.write(f'\r{progress}')
+                sys.stdout.write('\n')
+            else:
+                print("Arquivo vazio. Nenhum dado para ser gravado no BD")
             
     def __del__(self):
         self.close()
