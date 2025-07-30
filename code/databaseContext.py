@@ -10,10 +10,24 @@ import sys
 import pandas as pd
 from dask import dataframe as dd
 from typing import Union
+import os
+
+from environmental_variable_fetcher import loadEnvironmentalVariables
+
 
 class DatabaseContext:
-    def __init__(self, user:str, passw: str, host:str, port: str, database:str):
+    def __init__(self):
         
+        loadEnvironmentalVariables()
+
+        # Conectar no banco de dados:
+        # Dados da conexão com o BD
+        user=os.getenv('DB_USER')
+        passw=os.getenv('DB_PASSWORD')
+        host=os.getenv('DB_HOST')
+        port=os.getenv('DB_PORT')
+        database=os.getenv('DB_NAME')
+
         
         self.databaseConnectionString = ('postgresql://'+user+':'+passw+'@'+host+':'+port+'/'+database)
         
@@ -26,6 +40,16 @@ class DatabaseContext:
         
         
     def sanitizarBD(self):
+        """
+        Sanitiza o BD, limpando todos os dados de todas as tabelas do BD
+
+        Returns
+        -------
+        None.
+
+        """
+        print("Sanitizando o BD")
+        
         self.cur.execute('DROP TABLE IF EXISTS "estabelecimento";')
         
         self.cur.execute('DROP TABLE IF EXISTS "empresa";')
@@ -60,6 +84,7 @@ class DatabaseContext:
         
     def to_sql(self, 
                df: Union[dd.DataFrame, pd.DataFrame], 
+               if_exists = 'append',
                chunksize = (2**15), 
                **kwargs):
         """
@@ -85,6 +110,9 @@ class DatabaseContext:
 
         """
         
+        if ("if_exists" in kwargs):
+            del kwargs["if_exists"]
+        
         if (isinstance(df, dd.DataFrame)):
             name = kwargs.get('name')
             progress = f'Escrevendo dados de: {name}.'
@@ -92,7 +120,7 @@ class DatabaseContext:
                       uri = self.databaseConnectionString,
                       chunksize=chunksize, 
                       method="multi", 
-                      if_exists = 'append',
+                      if_exists = if_exists,
                       parallel=True)
             
             sys.stdout.write(f'\r{progress}')
@@ -108,7 +136,7 @@ class DatabaseContext:
                     return (dfx[i:i + chunksize] for i in range(0, len(dfx), chunksize))
             
                 for i, df in enumerate(chunker(df)):
-                    df.to_sql(con=self.engine, if_exists = 'append', **kwargs)
+                    df.to_sql(con=self.engine, if_exists = if_exists, **kwargs)
                     index = (i+1)
                     progress = f'Escrevendo dados de: {name}. Processo: {index} de {total}.'
                     sys.stdout.write(f'\r{progress}')

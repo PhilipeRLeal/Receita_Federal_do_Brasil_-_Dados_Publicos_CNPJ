@@ -15,6 +15,7 @@ from filtros_de_securitizacao import filtrar_dados_de_securitizacao
 def processarEmpresas(dataHolder: DataHolder, 
                       databaseContext: DatabaseContext,
                       output_directory_of_extracted_files: str,
+                      nomeDaTabela='empresa',
                       chunksize = 32_000_000):
     
     empresa_insert_start = time()
@@ -26,7 +27,7 @@ def processarEmpresas(dataHolder: DataHolder,
 
 
     for e in dataHolder.arquivos_empresa:
-        print('Trabalhando no arquivo: '+ e +' [...]')
+        print('Trabalhando no arquivo: '+ e + f' de {nomeDaTabela}')
         
         dtypes = {'cnpj_basico': str, 
                           'razao_social': str, 
@@ -53,18 +54,17 @@ def processarEmpresas(dataHolder: DataHolder,
         # Filtrando empresas do tipo Securitizadora
         empresa = filtrar_dados_de_securitizacao(empresa, 
                                                  dataHolder.securitizadoras['cnpj_basico'])
-
-        # Replace "," por "."
-        empresa['capital_social'] = empresa['capital_social'].apply(lambda x: x.replace(',','.'))
+        
+        empresa['capital_social'] = empresa['capital_social'].apply(lambda x: str(x).replace(',','.'),  meta=('capital_social', str))
         empresa['capital_social'] = empresa['capital_social'].astype(float)
 
         # Gravar dados no banco:
         # Empresa
-        databaseContext.to_sql(empresa, name='empresa', if_exists='append', index=False)
+        databaseContext.to_sql(empresa, name=nomeDaTabela, if_exists='append', index=False)
         print('Arquivo ' + e + ' inserido com sucesso no banco de dados!')
 
 
     print('Arquivos de empresa finalizados!')
     empresa_insert_end = time()
     empresa_Tempo_insert = round((empresa_insert_end - empresa_insert_start))
-    print('Tempo de execução do processo de empresa (em segundos): ' + str(empresa_Tempo_insert))
+    print(f'Tempo de execução do processo de {nomeDaTabela} (em segundos): ' + str(empresa_Tempo_insert))

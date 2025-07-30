@@ -102,7 +102,7 @@ def _processarEstabelecimentos(lista: pd.DataFrame,
 
 def processarEstabelecimentos(arquivos: list[str], 
                              output_directory_of_extracted_files: str,
-                             databaseContext: DatabaseContext) -> pd.DataFrame:
+                             databaseContext: DatabaseContext) -> None:
     
     
         
@@ -113,8 +113,6 @@ def processarEstabelecimentos(arquivos: list[str],
     """)
     
     
-    # Arquivos de estabelecimento:
-    estabelecimentos: list[pd.DataFrame] = list()
     start = time()
 
     print('Tem %i arquivos de estabelecimento!' % len(arquivos))
@@ -130,15 +128,9 @@ def processarEstabelecimentos(arquivos: list[str],
                                if_exists='append', 
                                index=False)
         
-        estabelecimentos.append(estabelecimento)
-        
-    securitizadoras = dd.concat(estabelecimentos, 
-                                ignore_order = True,
-                                ignore_unknown_divisions=True)
     
     print('Arquivos de estabelecimentos finalizados!')
     end = time()
     elapsedTime = round((end - start))
     print('Tempo de execução do processo de estabelecimentos (em segundos): ' + str(elapsedTime))
     
-    return securitizadoras

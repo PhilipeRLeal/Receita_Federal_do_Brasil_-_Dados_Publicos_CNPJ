@@ -41,7 +41,7 @@ def processarMunicipios(dataHolder: DataHolder,
        
         # Gravar dados no banco:
         # munic
-        databaseContext.to_sql(munic, name='munic', if_exists='append', index=False)
+        databaseContext.to_sql(munic, name='munic', index=False)
         print('Arquivo ' + e + ' inserido com sucesso no banco de dados!')
 
     try:

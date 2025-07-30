@@ -1,10 +1,9 @@
-import os
-import pandas as pd
-from databaseContext import DatabaseContext
 from time import time
+from dask import dataframe as dd
+
+from databaseContext import DatabaseContext
 from data_download import (download, 
                            unzipFiles, 
-                           output_directory_of_extracted_files, 
                            segregarDadosPorTabelaDoBD)
 
 from estabelecimentos import processarEstabelecimentos
@@ -17,34 +16,30 @@ from municipio import processarMunicipios
 from natju import processarNATJU
 from pais import processarPaises
 from qualificacaoDeSocio import processarQualificacoesDeSocios
+from outputDirectoryManager import loadOoutPutDirectories
 
-#%% main CONFIG
+#%% Iniciando contador de tempo
+start = time()
 
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', 500)
+#%% diretórios para trabalho
+
+(output_directory_of_downloaded_files, 
+ output_directory_of_extracted_files) = loadOoutPutDirectories()
 
 #%%
 # Extracting files:
     
-insert_start = time()
-    
-Files: list[str] = download()
 
-unzipFiles(Files)
+Files: list[str] = download(output_directory_of_downloaded_files)
+unzipFiles(Files, 
+           output_directory_of_downloaded_files,
+           output_directory_of_extracted_files)
 
 dataHolder = segregarDadosPorTabelaDoBD(output_directory_of_extracted_files)
 
-#%%
-# Conectar no banco de dados:
-# Dados da conexão com o BD
-user=os.getenv('DB_USER')
-passw=os.getenv('DB_PASSWORD')
-host=os.getenv('DB_HOST')
-port=os.getenv('DB_PORT')
-database=os.getenv('DB_NAME')
+#%% Contexto de comunicação com o BD
 
-
-databaseContext = DatabaseContext(user, passw, host, port, database)
+databaseContext = DatabaseContext()
 databaseContext.sanitizarBD()
 
 #%% 
@@ -52,15 +47,16 @@ databaseContext.sanitizarBD()
 
 print('Tem %i arquivos de estabelecimento!' % len(dataHolder.arquivos_estabelecimento))
 
-
-securitizadoras = processarEstabelecimentos(dataHolder.arquivos_estabelecimento, 
-                                            output_directory_of_extracted_files,
-                                            databaseContext)
-
-dataHolder.securitizadoras = securitizadoras
+processarEstabelecimentos(dataHolder.arquivos_estabelecimento, 
+                           output_directory_of_extracted_files,
+                           databaseContext)
+        
+dataHolder.securitizadoras = dd.read_sql_table("estabelecimento", 
+                                               con=databaseContext.databaseConnectionString,
+                                               index_col="index")
 
 #%%
-# # Arquivos de empresa:
+# Arquivos de empresa:
 
 processarEmpresas(dataHolder, 
                   databaseContext,
@@ -124,9 +120,9 @@ processarQualificacoesDeSocios(dataHolder,
                                output_directory_of_extracted_files)  
     
 #%%
-insert_end = time()
-Tempo_insert = round((insert_end - insert_start))
-del insert_start, insert_end
+end = time()
+Tempo_insert = round((end - start))
+del  start, end
 
 print("""
 #############################################
@@ -146,7 +142,7 @@ print('Tempo total de execução do processo de carga (em segundos): ' + str(Tem
 
 #%% Fechando conexão com o BD
 
-    
+
 def criarIndicesNasTabelasdoBd():
     index_start = time()
     print("""
@@ -181,6 +177,5 @@ def criarIndicesNasTabelasdoBd():
 
 
 criarIndicesNasTabelasdoBd()
-databaseContext.conn.close()
-databaseContext.engine.close()
+databaseContext.close()
 

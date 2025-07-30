@@ -29,7 +29,6 @@ def processarNATJU(dataHolder: DataHolder,
     for e in dataHolder.arquivos_natju:
         print('Trabalhando no arquivo: '+ e +' [...]')
     
-    
         dtypes = {'codigo': int, 'descricao': str}
         extracted_file_path = os.path.join(output_directory_of_extracted_files, e)
         

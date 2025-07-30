@@ -40,7 +40,7 @@ def processarQualificacoesDeSocios(dataHolder: DataHolder,
     
         # Gravar dados no banco:
         # quals
-        databaseContext.to_sql(quals, name='quals',  if_exists='append', index=False)
+        databaseContext.to_sql(quals, name='quals', if_exists='append', index=False)
         print('Arquivo ' + e + ' inserido com sucesso no banco de dados!')
     
     print('Arquivos de QUALIFICAÇÃO DE SÓCIO finalizados!')

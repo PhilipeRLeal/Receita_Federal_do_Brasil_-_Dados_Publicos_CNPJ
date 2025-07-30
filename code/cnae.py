@@ -52,7 +52,7 @@ def processarCNAEs(dataHolder: DataHolder,
     
         # Gravar dados no banco:
         # cnae
-        databaseContext.to_sql(cnae, name='cnae', if_exists='append', index=False)
+        databaseContext.to_sql(cnae, name='cnae', index=False)
         print('Arquivo ' + e + ' inserido com sucesso no banco de dados!')
     
     

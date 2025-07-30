@@ -53,9 +53,6 @@ def processarSimples(dataHolder: DataHolder,
                               index_col=False,
                               chunksize=chunks
         )
-        
-        print('Este arquivo será dividido em ' + str(len(reader)) + ' partes para inserção no banco de dados')
-        
         for i, simples in enumerate(reader):
         
             print('Iniciando a parte ' + str(i+1) + ' do simples [...]')
@@ -66,7 +63,7 @@ def processarSimples(dataHolder: DataHolder,
             
             # Gravar dados no banco:
             # simples
-            databaseContext.to_sql(simples, name='simples', if_exists='append', index=False)
+            databaseContext.to_sql(simples, name='simples', index=False)
             print('Arquivo ' + e + ' inserido com sucesso no banco de dados! - Parte '+ str(i+1))
 
 

@@ -33,8 +33,8 @@ def processarSocios(dataHolder: DataHolder,
                   'nome_socio_razao_social': str, 
                   'cpf_cnpj_socio': str, 
                   'qualificacao_socio': int, 
-                  'data_entrada_sociedade': int, 
-                  'pais': int,
+                  'data_entrada_sociedade': str, 
+                  'pais': str,
                   'representante_legal': str, 
                   'nome_do_representante': str, 
                   'qualificacao_representante_legal': int, 
@@ -57,7 +57,7 @@ def processarSocios(dataHolder: DataHolder,
         
         # Gravar dados no banco:
         # socios
-        databaseContext.to_sql(socios, name='socios', if_exists='append', index=False)
+        databaseContext.to_sql(socios, name='socios', index=False)
         print('Arquivo ' + e + ' inserido com sucesso no banco de dados!')
 
     del socios

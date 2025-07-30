@@ -9,8 +9,9 @@ import wget
 import os
 import requests
 import sys
-import pathlib
-from dotenv import load_dotenv
+
+import pandas as pd
+
 import urllib
 import zipfile
 
@@ -37,13 +38,6 @@ def check_diff(url, file_name) -> bool:
     return False # arquivos sao iguais
 
 
-def makedirs(path):
-    '''
-    cria path caso seja necessario
-    '''
-    if not os.path.exists(path):
-        os.makedirs(path)
-
 
 # Create this bar_progress method which is invoked automatically from wget:
 def bar_progress(current, total, width=80):
@@ -52,34 +46,9 @@ def bar_progress(current, total, width=80):
   sys.stdout.write("\r" + progress_message)
   sys.stdout.flush()
 
-#%% Environmental  variables
-
-current_path = pathlib.Path().resolve()
-dotenv_path = os.path.join(current_path, '.env')
-load_dotenv(dotenv_path=dotenv_path)
-
-
-# Read details from ".env" file:
-output_directory_of_downloaded_files = None
-output_directory_of_extracted_files = None
-try:
-    output_directory_of_downloaded_files = os.getenv('OUTPUT_DIRECTORY_FOR_DOWNLOAD_PATH')
-    output_directory_of_extracted_files = os.getenv('OUTPUT_DIRECTORY_FOR_EXTRACTED_DATA_PATH')
-    
-    print('Diretórios definidos: \n' +
-          'diretório para download: ' + str(output_directory_of_downloaded_files)  + '\n' +
-          'diretório para extração dos arquivos zip: ' + str(output_directory_of_extracted_files))
-    
-    makedirs(output_directory_of_downloaded_files)
-    makedirs(output_directory_of_extracted_files)
-
-except:
-    pass
-    print('Erro na definição dos diretórios, verifique o arquivo ".env" ou o local informado do seu arquivo de configuração.')
-
 #%% Donwloads
 
-def download() -> list[str]:
+def download(output_directory_of_downloaded_files: str) -> list[str]:
     """
     
     Returns
@@ -122,7 +91,9 @@ def download() -> list[str]:
     return Files
 
 
-def unzipFiles(files: list[str]):
+def unzipFiles(files: list[str],
+               output_directory_of_downloaded_files: str,
+               output_directory_of_extracted_files: str):
     i_l = 0
     for file in files:
         try:

@@ -5,7 +5,6 @@ Created on Tue Jul 29 12:38:33 2025
 @author: lealp
 """
 import pandas as pd
-from dask import dataframe as dd
 
 def filtrar_dados_de_securitizacao(df: pd.DataFrame, 
                                    securitizadoras: pd.Series) -> pd.DataFrame:
@@ -28,17 +27,8 @@ def filtrar_dados_de_securitizacao(df: pd.DataFrame,
 
     """
     
-    if (isinstance(df, pd.DataFrame)):
-        mask = [securitizadoras.str.contains(cnpj) for cnpj in df['cnpj_basico']]
-        
-        df = df.loc[mask]
-        
-    elif (isinstance(df, dd.DataFrame)):
-        merged = df.merge(dd.DataFrame(securitizadoras), how="inner", on='cnpj_basico')
-        
-        df = merged
-        
-    else:
-        pass
+    mask = df['cnpj_basico'].isin(securitizadoras)
+    
+    df = df.loc[mask]
     
     return df

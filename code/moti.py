@@ -39,7 +39,7 @@ def processarMOTI(dataHolder: DataHolder,
                            encoding='latin-1',
                            index_col=False)
 
-        databaseContext.to_sql(moti, name='moti', if_exists='append', index=False)
+        databaseContext.to_sql(moti, name='moti', index=False)
         print('Arquivo ' + e + ' inserido com sucesso no banco de dados!')
 
 
