@@ -43,7 +43,7 @@ def processarSimples(dataHolder: DataHolder,
         simples_lenght = sum(1 for line in open(extracted_file_path, "r"))
         print('Linhas no arquivo do Simples '+ e +': '+str(simples_lenght))
 
-        simples = dd.read_csv(filepath_or_buffer=extracted_file_path,
+        simples = dd.read_csv(urlpath=extracted_file_path,
                               sep=';',
                               names=dtypes.keys(),
                               header=None,
@@ -53,10 +53,12 @@ def processarSimples(dataHolder: DataHolder,
                               blocksize=blocksize
         )
         
+
         # Filtrando empresas do tipo Securitizadora
         simples = filtrar_dados_de_securitizacao(simples, 
                                                  dataHolder.securitizadoras['cnpj_basico'])
-        
+
+
         # Gravar dados no banco:
         # simples
         databaseContext.to_sql(simples, name='simples', index=False)

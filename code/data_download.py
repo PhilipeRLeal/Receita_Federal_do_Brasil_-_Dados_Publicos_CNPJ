@@ -133,7 +133,8 @@ class DataHolder:
         self.arquivos_pais = arquivos_pais
         self.arquivos_quals = arquivos_quals
         self.securitizadoras: pd.Series = None
-
+        
+        
 def segregarDadosPorTabelaDoBD(output_directory_of_extracted_files: str) -> DataHolder:
         
     # Files:

@@ -32,7 +32,6 @@ def processarNATJU(dataHolder: DataHolder,
     None.
 
     """
-    
         
     natju_insert_start = time()
     print("""
@@ -40,7 +39,6 @@ def processarNATJU(dataHolder: DataHolder,
     ## Arquivos de natureza jurídica:
     #################################
     """)
-    
     
     
     for e in dataHolder.arquivos_natju:

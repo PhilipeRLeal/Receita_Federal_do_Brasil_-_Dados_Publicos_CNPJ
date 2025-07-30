@@ -92,10 +92,11 @@ def _processarEstabelecimentos(lista: pd.DataFrame,
                                   blocksize = chunksize,
                                   index_col=False
             )
-            
+         
             mask = estabelecimento["cnae_fiscal_principal"].str.startswith(cnae)
             
             estabelecimento = estabelecimento.loc[mask]
+
             
             yield estabelecimento
 

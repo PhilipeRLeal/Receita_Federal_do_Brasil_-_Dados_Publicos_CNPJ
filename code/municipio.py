@@ -14,7 +14,7 @@ from databaseContext import DatabaseContext
 def processarMunicipios(dataHolder: DataHolder, 
                        databaseContext: DatabaseContext,
                        output_directory_of_extracted_files: str):
-
+    
     munic_insert_start = time()
     print("""
     ##########################

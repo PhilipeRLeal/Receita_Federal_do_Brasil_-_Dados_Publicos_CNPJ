@@ -50,7 +50,6 @@ def processarEmpresas(dataHolder: DataHolder,
                               index_col=False,
                               decimal=","
         )
-        
         # Filtrando empresas do tipo Securitizadora
         empresa = filtrar_dados_de_securitizacao(empresa, 
                                                  dataHolder.securitizadoras['cnpj_basico'])

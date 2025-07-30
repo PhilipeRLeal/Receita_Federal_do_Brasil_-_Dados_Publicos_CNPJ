@@ -43,6 +43,7 @@ databaseContext.sanitizarBD()
 
 #%% processando securitizadoras
 
+
 print('Tem %i arquivos de estabelecimento!' % len(dataHolder.arquivos_estabelecimento))
 
 processarEstabelecimentos(dataHolder.arquivos_estabelecimento, 

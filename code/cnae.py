@@ -19,8 +19,8 @@ from data_download import DataHolder
 from databaseContext import DatabaseContext
 
 def processarCNAEs(dataHolder: DataHolder, 
-                      databaseContext: DatabaseContext,
-                      output_directory_of_extracted_files: str):
+                   databaseContext: DatabaseContext,
+                   output_directory_of_extracted_files: str):
     
     cnae_insert_start = time()
     print("""

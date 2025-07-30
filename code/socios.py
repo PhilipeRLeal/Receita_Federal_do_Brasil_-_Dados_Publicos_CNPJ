@@ -10,7 +10,10 @@ import os
 from time import time
 from data_download import DataHolder
 from databaseContext import DatabaseContext
+<<<<<<< HEAD
 from filtros_de_securitizacao import filtrar_dados_de_securitizacao
+=======
+>>>>>>> master
 
 def processarSocios(dataHolder: DataHolder, 
                     databaseContext: DatabaseContext,
@@ -50,10 +53,10 @@ def processarSocios(dataHolder: DataHolder,
                               index_col=False
         )
 
-
         # Filtrando empresas do tipo Securitizadora
         socios = filtrar_dados_de_securitizacao(socios, 
                                                 dataHolder.securitizadoras['cnpj_basico'])
+
         
         # Gravar dados no banco:
         # socios
