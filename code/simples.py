@@ -5,7 +5,7 @@ Created on Tue Jul 29 13:10:33 2025
 @author: lealp
 """
 
-import pandas as pd
+from dask import dataframe as dd
 from databaseContext import DatabaseContext
 import os
 from time import time
@@ -15,7 +15,8 @@ from data_download import DataHolder
 
 def processarSimples(dataHolder: DataHolder, 
                      databaseContext: DatabaseContext, 
-                     outputDirectory: str) -> None:
+                     outputDirectory: str,
+                     blocksize = 16_000_000) -> None:
     
     simples_insert_start = time()
     print("""
@@ -29,12 +30,12 @@ def processarSimples(dataHolder: DataHolder,
         print('Trabalhando no arquivo: '+e+' [...]')
         
         dtypes = {'cnpj_basico': str, 
-                'opcao_pelo_simples': str, 
-                'data_opcao_simples': int, 
-                'data_exclusao_simples': int, 
-                'opcao_mei': str, 
-                'data_opcao_mei': int, 
-                'data_exclusao_mei': int}
+                  'opcao_pelo_simples': str, 
+                  'data_opcao_simples': int, 
+                  'data_exclusao_simples': int, 
+                  'opcao_mei': str, 
+                  'data_opcao_mei': int, 
+                  'data_exclusao_mei': int}
         
         
         extracted_file_path = os.path.join(outputDirectory, e)
@@ -42,30 +43,24 @@ def processarSimples(dataHolder: DataHolder,
         simples_lenght = sum(1 for line in open(extracted_file_path, "r"))
         print('Linhas no arquivo do Simples '+ e +': '+str(simples_lenght))
 
-        chunks = 1000000 # Registros por carga
-        
-        reader = pd.read_csv(filepath_or_buffer=extracted_file_path,
+        simples = dd.read_csv(filepath_or_buffer=extracted_file_path,
                               sep=';',
                               names=dtypes.keys(),
                               header=None,
                               dtype=dtypes,
                               encoding='latin-1',
                               index_col=False,
-                              chunksize=chunks
+                              blocksize=blocksize
         )
-        for i, simples in enumerate(reader):
         
-            print('Iniciando a parte ' + str(i+1) + ' do simples [...]')
-            
-            # Filtrando empresas do tipo Securitizadora
-            simples = filtrar_dados_de_securitizacao(simples, 
-                                                     dataHolder.securitizadoras['cnpj_basico'])
-            
-            # Gravar dados no banco:
-            # simples
-            databaseContext.to_sql(simples, name='simples', index=False)
-            print('Arquivo ' + e + ' inserido com sucesso no banco de dados! - Parte '+ str(i+1))
-
+        # Filtrando empresas do tipo Securitizadora
+        simples = filtrar_dados_de_securitizacao(simples, 
+                                                 dataHolder.securitizadoras['cnpj_basico'])
+        
+        # Gravar dados no banco:
+        # simples
+        databaseContext.to_sql(simples, name='simples', index=False)
+       
 
     print('Arquivos do simples finalizados!')
     simples_insert_end = time()

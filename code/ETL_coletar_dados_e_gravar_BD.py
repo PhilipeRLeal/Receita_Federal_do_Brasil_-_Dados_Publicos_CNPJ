@@ -19,6 +19,7 @@ from qualificacaoDeSocio import processarQualificacoesDeSocios
 from outputDirectoryManager import loadOoutPutDirectories
 
 #%% Iniciando contador de tempo
+
 start = time()
 
 #%% diretórios para trabalho
@@ -26,10 +27,8 @@ start = time()
 (output_directory_of_downloaded_files, 
  output_directory_of_extracted_files) = loadOoutPutDirectories()
 
-#%%
-# Extracting files:
+#%% Extracting files:
     
-
 Files: list[str] = download(output_directory_of_downloaded_files)
 unzipFiles(Files, 
            output_directory_of_downloaded_files,
@@ -42,8 +41,7 @@ dataHolder = segregarDadosPorTabelaDoBD(output_directory_of_extracted_files)
 databaseContext = DatabaseContext()
 databaseContext.sanitizarBD()
 
-#%% 
-# processando securitizadoras
+#%% processando securitizadoras
 
 print('Tem %i arquivos de estabelecimento!' % len(dataHolder.arquivos_estabelecimento))
 
@@ -55,93 +53,64 @@ dataHolder.securitizadoras = dd.read_sql_table("estabelecimento",
                                                con=databaseContext.databaseConnectionString,
                                                index_col="index")
 
-#%%
-# Arquivos de empresa:
+#%% Arquivos de empresa:
 
 processarEmpresas(dataHolder, 
                   databaseContext,
                   output_directory_of_extracted_files)
 
-#%%
-# Arquivos de socios:
+#%% Arquivos de socios:
     
 processarSocios(dataHolder,
                 databaseContext,
                 output_directory_of_extracted_files)
     
 
-#%%
-# Arquivos de simples:
+#%% Arquivos de simples:
 
 processarSimples(dataHolder, 
                  databaseContext,
                  output_directory_of_extracted_files)
 
-#%%
-# Arquivos de cnae:
+#%% Arquivos de cnae:
+    
 processarCNAEs(dataHolder, 
                databaseContext,
                output_directory_of_extracted_files)
 
-#%%
-# Arquivos de moti:
+#%% Arquivos de moti:
+    
 processarMOTI(dataHolder, 
                databaseContext,
                output_directory_of_extracted_files)
     
-#%%
-# Arquivos de munic:
+#%% Arquivos de munic:
 
 processarMunicipios(dataHolder, 
                     databaseContext,
                     output_directory_of_extracted_files)    
 
-#%%
-# Arquivos de natju:
+#%% Arquivos de natureza jurídica:
     
 processarNATJU(dataHolder, 
                databaseContext,
                output_directory_of_extracted_files)    
 
 
-#%%
-# Arquivos de pais:
+#%% Arquivos de pais:
     
 processarPaises(dataHolder, 
                 databaseContext,
                 output_directory_of_extracted_files)   
     
-#%%
-# Arquivos de qualificação de sócios:
+#%% Arquivos de qualificação de sócios:
 
-    
 processarQualificacoesDeSocios(dataHolder, 
                                databaseContext,
                                output_directory_of_extracted_files)  
-    
-#%%
-end = time()
-Tempo_insert = round((end - start))
-del  start, end
 
-print("""
-#############################################
-## Processo de carga dos arquivos finalizado!
-#############################################
-""")
 
-print('Tempo total de execução do processo de carga (em segundos): ' + str(Tempo_insert)) # Tempo de execução do processo (em segundos): 17.770 (4hrs e 57 min)
-
-# ###############################
-# Tamanho dos arquivos:
-# empresa = 45.811.638
-# estabelecimento = 48.421.619
-# socios = 20.426.417
-# simples = 27.893.923
-# ###############################
-
-#%% Fechando conexão com o BD
-
+#%% Estabelecendo índices no BD
 
 def criarIndicesNasTabelasdoBd():
     index_start = time()
@@ -177,5 +146,20 @@ def criarIndicesNasTabelasdoBd():
 
 
 criarIndicesNasTabelasdoBd()
+
+#%% Finalização da rotina
+
+end = time()
+Tempo_insert = round((end - start))
+del  start, end
+
+print("""
+#############################################
+## Processo de carga dos arquivos finalizado!
+#############################################
+""")
+
+print('Tempo total de execução do processo de carga (em segundos): ' + str(Tempo_insert)) # Tempo de execução do processo (em segundos): 17.770 (4hrs e 57 min)
+
 databaseContext.close()
 

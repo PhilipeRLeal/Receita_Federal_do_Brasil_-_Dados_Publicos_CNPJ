@@ -15,6 +15,23 @@ from databaseContext import DatabaseContext
 def processarNATJU(dataHolder: DataHolder, 
                    databaseContext: DatabaseContext,
                    output_directory_of_extracted_files: str):
+    """
+    Processa os arquivos de natureza jurídica
+
+    Parameters
+    ----------
+    dataHolder : DataHolder
+        DESCRIPTION.
+    databaseContext : DatabaseContext
+        DESCRIPTION.
+    output_directory_of_extracted_files : str
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
     
         
     natju_insert_start = time()
