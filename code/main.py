@@ -1,5 +1,6 @@
 from time import time
 
+from formatadorDeTempo import formatarIntervalorTemporal
 from environmental_variable_fetcher import loadEnvironmentalVariables
 from databaseContext import DatabaseContext
 from data_download import (download, 
@@ -157,7 +158,7 @@ criarIndicesNasTabelasdoBd()
 #%% Finalização da rotina
 
 end = time()
-Tempo_insert = round((end - start))
+dt = formatarIntervalorTemporal(end - start)
 del  start, end
 
 print("""
@@ -166,8 +167,10 @@ print("""
 #############################################
 """)
 
-print('Tempo total de execução do processo de carga (em segundos): ' + str(Tempo_insert)) # Tempo de execução do processo (em segundos): 17.770 (4hrs e 57 min)
+print('Tempo total de execução do processo de carga: ' + str(dt)) # Tempo de execução do processo (em segundos): 17.770 (4hrs e 57 min)
+
+logging.info(f"Processamento finalizado. {dt}")
 
 databaseContext.close()
 
-logging.info("Processamento finalizado.")
+
