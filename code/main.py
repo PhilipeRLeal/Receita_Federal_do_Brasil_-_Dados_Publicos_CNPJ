@@ -1,6 +1,11 @@
 from time import time
+import os, sys
+import pathlib
 from dask import dataframe as dd
+import logging
 
+from environmental_variable_fetcher import loadEnvironmentalVariables
+from formatadorDeTempo import formatarIntervalorTemporal
 from databaseContext import DatabaseContext
 from data_download import (download, 
                            unzipFiles, 
@@ -19,7 +24,15 @@ from qualificacaoDeSocio import processarQualificacoesDeSocios
 from outputDirectoryManager import loadOoutPutDirectories
 
 #%% Iniciando contador de tempo
+localdir = os.path.join(pathlib.Path().resolve(),"code").replace("\\", "/")
 
+logfilename = os.path.join(localdir, 'app.log')
+logging.basicConfig(level=logging.INFO, 
+                    filename=logfilename,  # Specify the log file name
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.info("Iniciando processamento")
+
+loadEnvironmentalVariables()
 start = time()
 
 #%% diretórios para trabalho
@@ -151,7 +164,7 @@ criarIndicesNasTabelasdoBd()
 #%% Finalização da rotina
 
 end = time()
-Tempo_insert = round((end - start))
+dt = formatarIntervalorTemporal(end - start)
 del  start, end
 
 print("""
@@ -160,7 +173,9 @@ print("""
 #############################################
 """)
 
-print('Tempo total de execução do processo de carga (em segundos): ' + str(Tempo_insert)) # Tempo de execução do processo (em segundos): 17.770 (4hrs e 57 min)
+print('Tempo total de execução do processo de carga: ' + str(dt)) # Tempo de execução do processo (em segundos): 17.770 (4hrs e 57 min)
+
+logging.info(f"Processamento finalizado. {dt}")
 
 databaseContext.close()
 

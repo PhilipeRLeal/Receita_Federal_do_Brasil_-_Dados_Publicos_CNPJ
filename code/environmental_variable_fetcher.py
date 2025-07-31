@@ -9,7 +9,7 @@ import pathlib
 from dotenv import load_dotenv
 
 def loadEnvironmentalVariables():
-    current_path = pathlib.Path().resolve()
+    current_path = os.path.join(pathlib.Path().resolve(),"code").replace("\\", "/")
     dotenv_path = os.path.join(current_path, '.env')
     load_dotenv(dotenv_path=dotenv_path)
 

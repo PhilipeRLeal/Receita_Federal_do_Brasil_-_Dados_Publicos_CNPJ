@@ -12,6 +12,8 @@ from databaseContext import DatabaseContext
 import warnings
 from dask import dataframe as dd
 
+from formatadorDeTempo import formatarIntervalorTemporal
+
 def _processarEstabelecimentos(lista: pd.DataFrame, 
                                output_directory_of_extracted_files: str,
                                chunksize = 32_000_000,
@@ -40,8 +42,6 @@ def _processarEstabelecimentos(lista: pd.DataFrame,
 
     """
 
-    print('Tem %i arquivos de estabelecimento!' % len(lista))
-    
     dtypes = {'cnpj_basico': str, # 1
             'cnpj_ordem': str, # 2 
             'cnpj_dv': str,  # 3
@@ -118,20 +118,16 @@ def processarEstabelecimentos(arquivos: list[str],
 
     print('Tem %i arquivos de estabelecimento!' % len(arquivos))
 
-
     enumeravel = _processarEstabelecimentos(arquivos, 
                                             output_directory_of_extracted_files)
 
     for estabelecimento in enumeravel:
-        
         databaseContext.to_sql(estabelecimento, 
                                name='estabelecimento', 
                                if_exists='append', 
                                index=False)
-        
-    
-    print('Arquivos de estabelecimentos finalizados!')
+
     end = time()
-    elapsedTime = round((end - start))
-    print('Tempo de execução do processo de estabelecimentos (em segundos): ' + str(elapsedTime))
+    elapsedTime = formatarIntervalorTemporal(end - start)
+    print('Execução do processamento dos estabelecimentos: ' + str(elapsedTime))
     
