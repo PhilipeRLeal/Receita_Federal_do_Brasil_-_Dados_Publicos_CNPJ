@@ -1,5 +1,4 @@
 from time import time
-from dask import dataframe as dd
 
 from databaseContext import DatabaseContext
 from data_download import (download, 
