@@ -1,5 +1,6 @@
 from time import time
 
+from environmental_variable_fetcher import loadEnvironmentalVariables
 from databaseContext import DatabaseContext
 from data_download import (download, 
                            unzipFiles, 
@@ -18,6 +19,16 @@ from qualificacaoDeSocio import processarQualificacoesDeSocios
 from outputDirectoryManager import loadOoutPutDirectories
 
 #%% Iniciando contador de tempo
+
+
+localdir = os.path.join(pathlib.Path().resolve(),"code").replace("\\", "/")
+logfilename = os.path.join(localdir, 'app.log')
+logging.basicConfig(level=logging.INFO, 
+                    filename=logfilename,  # Specify the log file name
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.info("Iniciando processamento")
+
+loadEnvironmentalVariables()
 
 start = time()
 
@@ -159,3 +170,4 @@ print('Tempo total de execução do processo de carga (em segundos): ' + str(Tem
 
 databaseContext.close()
 
+logging.info("Processamento finalizado.")
