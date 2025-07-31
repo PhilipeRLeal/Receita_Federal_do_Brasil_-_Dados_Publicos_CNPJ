@@ -1,4 +1,5 @@
 from time import time
+import os, pathlib, logging
 
 from formatadorDeTempo import formatarIntervalorTemporal
 from environmental_variable_fetcher import loadEnvironmentalVariables
@@ -22,7 +23,7 @@ from outputDirectoryManager import loadOoutPutDirectories
 #%% Iniciando contador de tempo
 
 
-localdir = os.path.join(pathlib.Path().resolve(),"code").replace("\\", "/")
+localdir = os.getcwd()
 logfilename = os.path.join(localdir, 'app.log')
 logging.basicConfig(level=logging.INFO, 
                     filename=logfilename,  # Specify the log file name
